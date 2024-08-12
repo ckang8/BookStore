@@ -25,6 +25,8 @@ import com.example.bookstoreproject.components.Header
 fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var usernameError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
     val textStyle = TextStyle(
         fontSize = 20.sp
     )
@@ -61,7 +63,8 @@ fun LoginScreen(navController: NavController) {
             onValueChange = { username = it },
             label = "Username",
             isPassword = false,
-            textStyle = textStyle
+            textStyle = textStyle,
+            errorMessage = usernameError
         )
         //Password
         CustomTextField(
@@ -69,16 +72,27 @@ fun LoginScreen(navController: NavController) {
             onValueChange = { password = it },
             label = "Password",
             isPassword = true,
-            textStyle = textStyle
+            textStyle = textStyle,
+            errorMessage = passwordError
         )
         //Login Btn
         Button(onClick = {
-            if (username == "SS" && password == "11111") {
-                navController.navigate("home") {
-//                    popUpTo("login") { inclusive = true }
-                }
-            } else {
+            usernameError = null
+            passwordError = null
 
+            if (username.isEmpty()) {
+                usernameError = "Username cannot be empty"
+            } else if (password.isEmpty()) {
+                passwordError = "Password cannot be empty"
+            } else if (username != "SS") {
+                usernameError = "Invalid username"
+            } else if (password != "11111") {
+                passwordError = "Invalid password"
+            } else {
+                // Successful login
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
             }
         }) {
             Text(text = "Login", style = textStyle)

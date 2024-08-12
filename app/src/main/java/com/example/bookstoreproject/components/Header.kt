@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,15 +48,20 @@ fun Header (
     headerTitle: String = ""
 ) {
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
 
+    // Define text and button sizes based on screen width
+    val headerFontSize = if (screenWidth < 360.dp) 18.sp else 24.sp
+    val btnFontSize = if (screenWidth < 360.dp) 12.sp else 16.sp
 
     val headerStyle = TextStyle(
-        fontSize = 24.sp,
+        fontSize = headerFontSize,
         color = Color.White,
         fontWeight = FontWeight.Bold
     )
     val btnStyle = TextStyle(
-        fontSize = 16.sp,
+        fontSize = btnFontSize,
         color = Color.White,
         fontWeight = FontWeight.Bold
     )

@@ -24,6 +24,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,8 +34,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.example.bookstoreproject.R
@@ -65,11 +69,23 @@ fun BookModal (
     var permissionGranted by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false)}
+    var titleMessageError by remember { mutableStateOf(false)}
+    var authorMessageError by remember { mutableStateOf(false)}
+    var descriptionMessageError by remember { mutableStateOf(false)}
+    val keyboardController = LocalSoftwareKeyboardController.current
 
+    LaunchedEffect(isView) {
+        if (isView) {
+            titleMessageError = false
+            authorMessageError = false
+            descriptionMessageError = false
+        }
+    }
     // Check for permissions and handle them
     RequestPermissions {
         permissionGranted = true
     }
+
     //image
     var selectedImageUri by remember { mutableStateOf<Uri?>(bookImage) }
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -146,7 +162,10 @@ fun BookModal (
 
 
     Column(
- //       modifier = Modifier.verticalScroll(rememberScrollState()) // Add scrolling capability
+        modifier = Modifier
+            .clickable {
+                keyboardController?.hide()
+            }
     ){
         Box(
             modifier = Modifier
@@ -186,77 +205,125 @@ fun BookModal (
                     error = painterResource(id = R.drawable.ic_launcher_foreground)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Row(
+                Column(
                     modifier = Modifier
-                        .height(100.dp)
                         .padding(16.dp)
                         .border(
                             width = 2.dp,
-                            color = Color.Gray,
+                            color = if (titleMessageError) Color.Red else Color.Gray,
                             shape = RoundedCornerShape(16.dp)
                         )
                         .background(containerColorSelect,RoundedCornerShape(16.dp))
-                        .padding(8.dp),
-
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(8.dp)
                 ) {
-                    Text(text = "Name : ")
-                    //Book Title
-                    TextField(
-                        value = bookTitle,
-                        onValueChange = { newTitle -> onBookTitleChange(newTitle) },
-                        maxLines = 1,
-                        enabled = if (!isView || isEdit) true else false,
-                        colors = CustomTextFieldColors(),
-
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Name : ")
+                        //Book Title
+                        TextField(
+                            value = bookTitle,
+                            onValueChange = { newTitle ->
+                                if ( newTitle.length > 30) {
+                                    titleMessageError = true
+                                } else {
+                                    titleMessageError = false
+                                }
+                                onBookTitleChange(newTitle)
+                            },
+                            enabled = if (!isView || isEdit) true else false,
+                            colors = CustomTextFieldColors(),
+                        )
+                    }
+                    // Display error message if titleMessageError is true
+                    if (titleMessageError) {
+                        Spacer(modifier = Modifier.height(4.dp)) // Add space between TextField and error message
+                        Text(
+                            text = "Title should not exceeded 30 characters",
+                            color = Color.Red,
+                            style = TextStyle(fontSize = 12.sp)
+                        )
+                    }
                 }
 
-                Row(
+                Column(
                     modifier = Modifier
-                        .height(100.dp)
                         .padding(16.dp)
                         .border(
                             width = 2.dp,
-                            color = Color.Gray,
+                            color = if (authorMessageError) Color.Red else Color.Gray,
                             shape = RoundedCornerShape(16.dp)
                         )
                         .background(containerColorSelect,RoundedCornerShape(16.dp))
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(8.dp)
                 ) {
-                    Text(text = "Author : ")
-                    //Book Author
-                    TextField(
-                        value = bookAuthor,
-                        onValueChange = { newAuthor -> onBookAuthorChange(newAuthor) },
-                        maxLines = 1,
-                        enabled = if (!isView || isEdit) true else false,
-                        colors = CustomTextFieldColors()
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Author : ")
+                        //Book Title
+                        TextField(
+                            value = bookAuthor,
+                            onValueChange = { newAuthor ->
+                                if ( newAuthor.length > 30) {
+                                    authorMessageError = true
+                                } else {
+                                    authorMessageError = false
+                                }
+                                onBookAuthorChange(newAuthor)
+                            },
+                            enabled = if (!isView || isEdit) true else false,
+                            colors = CustomTextFieldColors(),
+                        )
+                    }
+                    // Display error message if titleMessageError is true
+                    if (authorMessageError) {
+                        Spacer(modifier = Modifier.height(4.dp)) // Add space between TextField and error message
+                        Text(
+                            text = "Author should not exceeded 30 characters",
+                            color = Color.Red,
+                            style = TextStyle(fontSize = 12.sp)
+                        )
+                    }
                 }
-                Row(
+
+
+                Column(
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxWidth()
                         .border(
                             width = 2.dp, // Border width
-                            color = Color.Gray, // Border color
+                            color = if (descriptionMessageError) Color.Red else Color.Gray,
                             shape = RoundedCornerShape(16.dp) // Apply the same radius to the border
                         )
-                        .background(containerColorSelect,RoundedCornerShape(16.dp)),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                        .background(containerColorSelect,RoundedCornerShape(16.dp))
+                        .padding(8.dp),
                 ) {
                     TextField(
                         value = bookDescription,
-                        onValueChange = { newDescription -> onBookDescriptionChange(newDescription) },
+                        onValueChange = { newDescription ->
+                            if ( newDescription.length > 150) {
+                                descriptionMessageError = true
+                            } else {
+                                descriptionMessageError = false
+                            }
+                            onBookDescriptionChange(newDescription)
+                                        },
                         minLines = 5,
                         maxLines = 5,
                         enabled = if (!isView || isEdit) true else false,
                         label = { Text("Description...") },
                         colors = CustomTextFieldColors()
                     )
+                    if (descriptionMessageError) {
+                        Spacer(modifier = Modifier.height(4.dp)) // Add space between TextField and error message
+                        Text(
+                            text = "Description should not exceeded 150 characters",
+                            color = Color.Red,
+                            style = TextStyle(fontSize = 12.sp)
+                        )
+                    }
                 }
             }
         }

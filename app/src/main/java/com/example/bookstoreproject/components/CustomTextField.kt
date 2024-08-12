@@ -1,9 +1,11 @@
 package com.example.bookstoreproject.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,16 +25,38 @@ fun CustomTextField (
         fontSize = 16.sp,
         color = Color.Black
     ),
-    labelWidth: Int = 300
+    labelWidth: Int = 300,
+    errorMessage: String? = null // Add this parameter
+
 ) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier
-            .widthIn(max= labelWidth.dp)
-            .padding(bottom = 16.dp),
-        label = { Text(label, style = textStyle) },
-        textStyle = textStyle,
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-    )
+    val fieldPadding = if (errorMessage != null) 0.dp  else 16.dp
+
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .widthIn(max = labelWidth.dp)
+                .padding(bottom = fieldPadding),
+            label = { Text(label, style = textStyle) },
+            textStyle = textStyle,
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = if (errorMessage != null) Color.Red else Color.Gray,
+                unfocusedIndicatorColor = if (errorMessage != null) Color.Red else Color.Gray
+            ),
+            isError = errorMessage != null
+        )
+
+        // Error message
+        if (errorMessage != null) {
+            Text(
+                modifier = Modifier
+                    .padding(8.dp),
+                text = errorMessage,
+                color = Color.Red,
+                style = TextStyle(fontSize = 12.sp)
+            )
+        }
+    }
 }

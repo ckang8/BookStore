@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
@@ -126,11 +128,24 @@ fun BookListItem(
                         .weight(1f)
                         .padding(25.dp)
                 ){
-                    Text(text = "${book.bookTitle}",
+                    Text(
+                        text = book.bookTitle,
                         style = titleStyle,
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis, // Ensures text is truncated with ellipsis
+                        modifier = Modifier
+                            .fillMaxWidth() // Make sure it uses available width
+                            .widthIn(max = 200.dp) // Set maximum width
                     )
-                    Text(text = "By ${book.bookAuthor}", style = normalStyle)
+                    Text(
+                        text = "By ${book.bookAuthor}",
+                        style = normalStyle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth() // Make sure it uses available width
+                            .widthIn(max = 200.dp) // Set maximum width
+                    )
                 }
                 Text(text = formattedDate, style = normalStyle)
                 Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null)

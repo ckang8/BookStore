@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
@@ -26,11 +27,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-@Preview(showBackground = true)
+
 @Composable
 fun NavigationRoutes() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "home") {
         composable("login") { LoginScreen(navController) }
         composable("home") { HomePage(navController) }
         composable("create") { CreateBook(navController) }
@@ -40,6 +41,22 @@ fun NavigationRoutes() {
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    BookStoreProjectTheme {
+        NavigationRoutes()
+    }
+}
+
+@Preview
+@Composable
+fun testCase() {
+    Text(text = "123")
+}
+
+
 
 
 

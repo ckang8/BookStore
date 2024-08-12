@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -102,25 +101,7 @@ fun ViewEditBook (
                 },
                 onReset = {
                     onResetClick = true
-                    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                    val currentDate = dateFormat.format(System.currentTimeMillis())
-                    if (bookTitle.isBlank() || bookAuthor.isBlank() || bookDescription.isBlank()) {
-                        Toast.makeText(context, "Field cannot be blank", Toast.LENGTH_SHORT).show()
-                    } else if (bookTitle == it.bookTitle && bookAuthor == it.bookAuthor && bookDescription == it.bookDescription && bookImage.toString() == it.bookImage ) {
-                        Toast.makeText(context, "No changes made", Toast.LENGTH_SHORT).show()
-                    } else {
-                        val updatedBook = Book(
-                            id = it.id,
-                            bookTitle = bookTitle,
-                            bookAuthor = bookAuthor,
-                            bookDescription = bookDescription,
-                            bookImage = bookImage?.toString(),
-                            createdDate = currentDate
-                        )
-                        viewModel.updateBookWithID(it.id, updatedBook)
-                        mode = EditMode.VIEW
-                        Toast.makeText(context, "Updated Successfully", Toast.LENGTH_SHORT).show()
-                    }
+
                 },
                 labelRightColor = if (mode == EditMode.EDIT) Color.Blue else null,
                 headerTitle = bookTitle
@@ -143,9 +124,40 @@ fun ViewEditBook (
 //                        isReset = if (onResetClick) true else false
                     )
                 }
-            } ?:run {
-                Text(text = "Something went wrong")
             }
+
+
+        if(onBackClick) {
+            navController.navigate("home")
+            onBackClick = false
+            onResetClick = false
+        } else if (onResetClick) {
+            keyboardController?.hide()
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val currentDate = dateFormat.format(System.currentTimeMillis())
+            if (bookTitle.isBlank() || bookAuthor.isBlank() || bookDescription.isBlank()) {
+                onResetClick = false
+                Toast.makeText(context, "Field cannot be blank", Toast.LENGTH_SHORT).show()
+            } else if (bookTitle == it.bookTitle && bookAuthor == it.bookAuthor && bookDescription == it.bookDescription && bookImage.toString() == it.bookImage ) {
+                onResetClick = false
+                Toast.makeText(context, "No changes made", Toast.LENGTH_SHORT).show()
+            } else if (bookTitle.length > 30 || bookAuthor.length > 30 || bookDescription.length > 150) {
+                onResetClick = false
+            } else {
+                val updatedBook = Book(
+                    id = it.id,
+                    bookTitle = bookTitle,
+                    bookAuthor = bookAuthor,
+                    bookDescription = bookDescription,
+                    bookImage = bookImage?.toString(),
+                    createdDate = currentDate
+                )
+                viewModel.updateBookWithID(it.id, updatedBook)
+                mode = EditMode.VIEW
+                Toast.makeText(context, "Updated Successfully", Toast.LENGTH_SHORT).show()
+                onResetClick = false
+            }
+        }
 
 
     } ?: run {
@@ -163,11 +175,7 @@ fun ViewEditBook (
         }
     }
 
-    if(onBackClick) {
-        navController.navigate("home")
-        onBackClick = false
-        onResetClick = false
-    }
+
 }
 
 enum class EditMode {

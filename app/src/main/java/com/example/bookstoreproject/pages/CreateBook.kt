@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.bookstoreproject.R
@@ -30,6 +31,7 @@ fun CreateBook (navController: NavController) {
     var bookDescription by remember { mutableStateOf("") }
     var bookImage by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     BackHandler(enabled = true) {}
 
@@ -64,10 +66,13 @@ fun CreateBook (navController: NavController) {
     if(onBackClick) {
         navController.popBackStack()
     } else if(onCreateClick) {
+        keyboardController?.hide()
         if (bookTitle.isBlank() || bookAuthor.isBlank() || bookDescription.isBlank()) {
             Toast.makeText(context, "All fields are required", Toast.LENGTH_SHORT).show()
             onCreateClick = false
-        } else {
+        } else if (bookTitle.length > 30 || bookAuthor.length > 30 || bookDescription.length > 150) {
+            onCreateClick = false
+        }  else {
             val bookImageUri = bookImage ?: Uri.parse("android.resource://${context.packageName}/${R.drawable.ic_launcher_foreground}")
 //            saveBookToFirestore(bookTitle, bookAuthor, bookDescription, imageUri, navController)
             bookViewModel.createBook(bookTitle, bookAuthor, bookDescription, bookImageUri)
