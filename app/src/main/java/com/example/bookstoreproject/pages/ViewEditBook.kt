@@ -19,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.bookstoreproject.components.BookModal
 import com.example.bookstoreproject.components.Header
+import com.example.bookstoreproject.components.NothingPage
 import com.example.bookstoreproject.viewModel.Book
 import com.example.bookstoreproject.viewModel.BookViewModel
 import java.text.SimpleDateFormat
@@ -42,7 +43,6 @@ fun ViewEditBook (
         }
     }
     // State for tracking initial values
-    var refreshKey by remember { mutableStateOf(0) } // Key to trigger refresh
     var onBackClick by remember { mutableStateOf(false) }
     var onEditClick by remember { mutableStateOf(false) }
     var onResetClick by remember { mutableStateOf(false) }
@@ -61,13 +61,6 @@ fun ViewEditBook (
     val context = LocalContext.current
     var mode by remember { mutableStateOf(EditMode.VIEW) }
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    // Refresh data whenever the screen is re-composed or mode changes
-    LaunchedEffect(refreshKey) {
-        bookId?.let {
-            viewModel.fetchBookWithID(it)
-        }
-    }
 
     book?.let {
         LaunchedEffect(it) {
@@ -100,7 +93,6 @@ fun ViewEditBook (
                         bookDescription = descriptionDefault
                         bookImage = imageDefault
                         onEditClick = false
-                        refreshKey++
                     }
                 },
                 onEdit = {
@@ -156,7 +148,20 @@ fun ViewEditBook (
             }
 
 
+    } ?: run {
+        Column {
+            Header(
+                labelLeft = "Back",
+                labelRight = "Edit",
+                isView = true,
+                onBack = {
+                    onBackClick = true
+                },
+                headerTitle = "-"
+            )
+            NothingPage()
         }
+    }
 
     if(onBackClick) {
         navController.navigate("home")

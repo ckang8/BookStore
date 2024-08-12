@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.bookstoreproject.components.BookListItem
 import com.example.bookstoreproject.components.Header
+import com.example.bookstoreproject.components.NothingPage
 import com.example.bookstoreproject.viewModel.BookViewModel
 
 
@@ -46,7 +47,7 @@ fun HomePage(
 
     BackHandler(enabled = true) {}
 
-    Column(){
+    Column {
         Header(
             labelLeft = "Logout",
             labelRight = "",
@@ -66,7 +67,12 @@ fun HomePage(
             LazyColumn (
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 55.dp) // Padding on all sides, with extra bottom padding
+                    .padding(
+                        start = 10.dp,
+                        top = 10.dp,
+                        end = 10.dp,
+                        bottom = 55.dp
+                    ) // Padding on all sides, with extra bottom padding
                     .background(
                         color = Color.White,
                     )
@@ -100,7 +106,7 @@ fun HomePage(
                 }
             }
         } else {
-            Text(text = "Nothing to show...")
+            NothingPage()
         }
 
     }
