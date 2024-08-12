@@ -98,10 +98,10 @@ fun BookListItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 0.dp) // Padding on all sides, with extra bottom padding
+            .padding(8.dp)
             .clickable { onClick() }
             .background(color = backgroundColor)
-            .shadow(elevation = shadowElevation, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
+            .shadow(elevation = shadowElevation, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)),
 
     ) {
         SwipeableActionsBox(

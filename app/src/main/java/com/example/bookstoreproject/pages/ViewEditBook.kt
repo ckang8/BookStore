@@ -57,7 +57,6 @@ fun ViewEditBook (
     var authorDefault by remember { mutableStateOf("") }
     var descriptionDefault by remember { mutableStateOf("") }
     var imageDefault by remember { mutableStateOf<Uri?>(null) }
-    var fixedTitle by remember { mutableStateOf("")}
 
     val context = LocalContext.current
     var mode by remember { mutableStateOf(EditMode.VIEW) }
@@ -80,7 +79,6 @@ fun ViewEditBook (
             bookAuthor = it.bookAuthor
             bookDescription = it.bookDescription
             bookImage = it.bookImage?.let { Uri.parse(it) }
-            fixedTitle = it.bookTitle
         }
         Column {
             Header(
@@ -133,7 +131,7 @@ fun ViewEditBook (
                     }
                 },
                 labelRightColor = if (mode == EditMode.EDIT) Color.Blue else null,
-                headerTitle = fixedTitle
+                headerTitle = bookTitle
             )
 
                 Box(
@@ -150,7 +148,7 @@ fun ViewEditBook (
                         containerColor = if (mode == EditMode.VIEW) Color.Transparent else null,
                         isView = mode == EditMode.VIEW,
                         isEdit = mode == EditMode.EDIT,
-                        isReset = if (onResetClick) true else false
+//                        isReset = if (onResetClick) true else false
                     )
                 }
             } ?:run {

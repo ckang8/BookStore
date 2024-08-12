@@ -58,7 +58,7 @@ fun BookModal (
     containerColor: Color? = null,
     isView: Boolean,
     isEdit: Boolean,
-    isReset: Boolean
+//    isReset: Boolean
 ) {
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }

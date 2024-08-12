@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -40,6 +41,8 @@ fun HomePage(
     val books = viewModel.books
     var selectedBookId by remember { mutableStateOf<String?>(null) } // Track selected book
     var dialogType by remember { mutableStateOf<DialogType?>(null) }
+    val context = LocalContext.current
+
 
     BackHandler(enabled = true) {}
 
@@ -51,51 +54,55 @@ fun HomePage(
 
             isLogout = true,
             onLogout = {
-                Log.d("HomePage", "Logout button clicked")
                 dialogType = DialogType.Logout
             },
             onAddbook = {
-                Log.d("HomePage", "Add Book button clicked")
                 addBookClick = true
             },
         )
 
-        LazyColumn (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 55.dp) // Padding on all sides, with extra bottom padding
-                .background(
-                    color = Color.White,
-                )
-                .border(
-                    width = 2.dp,
-                    color = Color.Gray,
-                    shape = RoundedCornerShape(16.dp)
-                ),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
 
-        ) {
-            items(books) { book ->
-                if (book != null) {
-                    BookListItem(
-                        book,
-                        isSelected = book.id == selectedBookId,
-                        onClick = {
-                            Log.d("HomePageBook","${selectedBookId}")
-                            selectedBookId = if (selectedBookId == book.id) null else book.id // Toggle selection
-                            navController.navigate("viewEdit/${selectedBookId}")
-                        },
-                        onDelete = {
-                            selectedBookId = book.id
-                            dialogType = DialogType.Delete
-                        }
+        if(books.isNotEmpty()) {
+            LazyColumn (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 55.dp) // Padding on all sides, with extra bottom padding
+                    .background(
+                        color = Color.White,
                     )
-                } else {
-                    Text(text = "Data Not Found.")
+                    .border(
+                        width = 2.dp,
+                        color = Color.Gray,
+                        shape = RoundedCornerShape(16.dp)
+                    ),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+
+            ) {
+                items(books) { book ->
+                    if (book != null) {
+                        BookListItem(
+                            book,
+                            isSelected = book.id == selectedBookId,
+                            onClick = {
+                                Log.d("HomePageBook","${selectedBookId}")
+                                selectedBookId = if (selectedBookId == book.id) null else book.id // Toggle selection
+                                navController.navigate("viewEdit/${selectedBookId}")
+                            },
+                            onDelete = {
+                                selectedBookId = book.id
+                                dialogType = DialogType.Delete
+                            }
+                        )
+                    } else {
+                        Text(text = "Data Not Found.")
+                    }
                 }
             }
+        } else {
+            Text(text = "Nothing to show...")
         }
+
     }
 
     if(addBookClick) {

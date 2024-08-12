@@ -57,7 +57,7 @@ fun CreateBook (navController: NavController) {
             onBookImageChange = { bookImage = it },
             isView = false,
             isEdit = false,
-            isReset = false
+//            isReset = false
         )
     }
 
@@ -68,9 +68,9 @@ fun CreateBook (navController: NavController) {
             Toast.makeText(context, "All fields are required", Toast.LENGTH_SHORT).show()
             onCreateClick = false
         } else {
-            val imageUri = bookImage ?: Uri.parse("android.resource://${context.packageName}/${R.drawable.ic_launcher_foreground}")
+            val bookImageUri = bookImage ?: Uri.parse("android.resource://${context.packageName}/${R.drawable.ic_launcher_foreground}")
 //            saveBookToFirestore(bookTitle, bookAuthor, bookDescription, imageUri, navController)
-            bookViewModel.createBook(bookTitle, bookAuthor, bookDescription, imageUri)
+            bookViewModel.createBook(bookTitle, bookAuthor, bookDescription, bookImageUri)
             navController.navigate("home")
             onCreateClick = false
         }
