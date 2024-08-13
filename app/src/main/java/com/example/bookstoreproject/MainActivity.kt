@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NavigationRoutes() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(navController = navController, startDestination = "login") {
         composable("login") { LoginScreen(navController) }
         composable("home") { HomePage(navController) }
         composable("create") { CreateBook(navController) }

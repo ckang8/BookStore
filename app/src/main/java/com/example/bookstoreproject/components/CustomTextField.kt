@@ -26,10 +26,10 @@ fun CustomTextField (
         color = Color.Black
     ),
     labelWidth: Int = 300,
-    errorMessage: String? = null // Add this parameter
+    errorMessage: String // Add this parameter
 
 ) {
-    val fieldPadding = if (errorMessage != null) 0.dp  else 16.dp
+    val fieldPadding = if (errorMessage.isNotEmpty()) 0.dp  else 16.dp
 
     Column {
         OutlinedTextField(
@@ -42,14 +42,14 @@ fun CustomTextField (
             textStyle = textStyle,
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = if (errorMessage != null) Color.Red else Color.Gray,
-                unfocusedIndicatorColor = if (errorMessage != null) Color.Red else Color.Gray
+                focusedIndicatorColor = if (errorMessage.isNotEmpty()) Color.Red else Color.Gray,
+                unfocusedIndicatorColor = if (errorMessage.isNotEmpty()) Color.Red else Color.Gray
             ),
-            isError = errorMessage != null
+            isError = errorMessage.isNotEmpty()
         )
 
         // Error message
-        if (errorMessage != null) {
+        if (errorMessage.isNotEmpty()) {
             Text(
                 modifier = Modifier
                     .padding(8.dp),

@@ -25,8 +25,8 @@ import com.example.bookstoreproject.components.Header
 fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var usernameError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
+    var usernameError by remember { mutableStateOf<String>("") }
+    var passwordError by remember { mutableStateOf<String>("") }
     val textStyle = TextStyle(
         fontSize = 20.sp
     )
@@ -77,18 +77,21 @@ fun LoginScreen(navController: NavController) {
         )
         //Login Btn
         Button(onClick = {
-            usernameError = null
-            passwordError = null
+            usernameError = ""
+            passwordError = ""
 
             if (username.isEmpty()) {
                 usernameError = "Username cannot be empty"
-            } else if (password.isEmpty()) {
-                passwordError = "Password cannot be empty"
-            } else if (username != "SS") {
+            }  else if (username != "SS") {
                 usernameError = "Invalid username"
+            }
+
+            if (password.isEmpty()) {
+                passwordError = "Password cannot be empty"
             } else if (password != "11111") {
                 passwordError = "Invalid password"
-            } else {
+            }
+            if (usernameError.isEmpty() && passwordError.isEmpty()){
                 // Successful login
                 navController.navigate("home") {
                     popUpTo("login") { inclusive = true }
