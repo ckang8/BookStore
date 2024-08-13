@@ -1,11 +1,14 @@
 package com.example.bookstoreproject.viewModel
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -24,6 +27,7 @@ data class Book(
 
 class BookViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance().reference
 
     var books: SnapshotStateList<Book> = mutableStateListOf()
         private set
@@ -38,20 +42,22 @@ class BookViewModel : ViewModel() {
     private fun fetchBooks() {
         db.collection("books")
             .orderBy("createdDate", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { result ->
-                books.clear()
-                for (document in result) {
-                    val book = document.toObject(Book::class.java)
-                    books.add(book.copy(id = document.id))
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    // Handle error
+                    return@addSnapshotListener
+                }
+
+                snapshot?.let {
+                    books.clear()
+                    for (document in it) {
+                        val book = document.toObject(Book::class.java)
+                        books.add(book.copy(id = document.id))
+                    }
                 }
             }
-            .addOnFailureListener { e ->
-                // Handle error
-            }
     }
-
-
+    
     fun fetchBookWithID(bookId: String) {
         db.collection("books").document(bookId)
             .get()
@@ -82,49 +88,109 @@ class BookViewModel : ViewModel() {
             }
     }
 
-    fun updateBookWithID(bookId: String, updatedBook: Book) {
-        db.collection("books").document(bookId)
-            .set(updatedBook)
-            .addOnSuccessListener {
-                // Update the local list if necessary
-                val index = books.indexOfFirst { it.id == bookId }
-                if (index != -1) {
-                    books[index] = updatedBook.copy(id = bookId)
-                }
-            }
-            .addOnFailureListener { e ->
-                // Handle error
-            }
-    }
-
-    fun createBook(title: String, author: String, description: String, imageUri: Uri) {
+    fun createBook(title: String, author: String, description: String, imageUri: Uri?) {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val currentDate = dateFormat.format(System.currentTimeMillis())
 
+        // Prepare book data
         val bookData = hashMapOf(
             "bookTitle" to title,
             "bookAuthor" to author,
             "bookDescription" to description,
-            "createdDate" to currentDate,
-            "bookImage" to imageUri.toString()
+            "createdDate" to currentDate
         )
 
+        if (imageUri != null) {
+            val imageRef: StorageReference = storage.child("images/${imageUri.lastPathSegment}")
+            imageRef.putFile(imageUri)
+                .addOnSuccessListener {
+                    // Get the download URL
+                    imageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                        bookData["bookImage"] = downloadUrl.toString()
+                        saveBookDataToFirestore(bookData)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    // Handle Storage error
+                    Log.e("CreateBook", "Image upload failed: ${e.message}")
+                    saveBookDataToFirestore(bookData)
+                }
+        } else {
+            // No image provided
+            saveBookDataToFirestore(bookData)
+        }
+    }
+
+    private fun saveBookDataToFirestore(bookData: Map<String, Any>) {
         db.collection("books")
             .add(bookData)
             .addOnSuccessListener { documentReference ->
                 val newBook = Book(
                     id = documentReference.id,
-                    bookTitle = title,
-                    bookAuthor = author,
-                    bookDescription = description,
-                    bookImage = imageUri.toString(),
-                    createdDate = currentDate
+                    bookTitle = bookData["bookTitle"] as String,
+                    bookAuthor = bookData["bookAuthor"] as String,
+                    bookDescription = bookData["bookDescription"] as String,
+                    bookImage = bookData["bookImage"] as? String,
+                    createdDate = bookData["createdDate"] as String
                 )
                 books.add(newBook)
             }
             .addOnFailureListener { e ->
-                // Handle error
+                // Handle Firestore error
+                Log.e("CreateBook", "Firestore error: ${e.message}")
             }
     }
+
+
+    fun updateBookWithID(bookId: String, updatedBook: Book, newImageUri: Uri?) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val currentDate = dateFormat.format(System.currentTimeMillis())
+
+        // If a new image URI is provided, upload it to Firebase Storage
+        if (newImageUri != null) {
+            val imageRef = storage.child("images/${newImageUri.lastPathSegment}")
+            imageRef.putFile(newImageUri)
+                .addOnSuccessListener {
+                    imageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                        // Update the book data with the new image URL
+                        val updatedBookData = updatedBook.copy(
+                            bookImage = downloadUrl.toString(),
+                            createdDate = currentDate
+                        )
+                        db.collection("books").document(bookId)
+                            .set(updatedBookData)
+                            .addOnSuccessListener {
+                                // Update the local list if necessary
+                                val index = books.indexOfFirst { it.id == bookId }
+                                if (index != -1) {
+                                    books[index] = updatedBookData.copy(id = bookId)
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                // Handle error
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    // Handle Storage error
+                }
+        } else {
+            // No new image provided, update Firestore with the existing book data
+            val updatedBookData = updatedBook.copy(createdDate = currentDate)
+            db.collection("books").document(bookId)
+                .set(updatedBookData)
+                .addOnSuccessListener {
+                    // Update the local list if necessary
+                    val index = books.indexOfFirst { it.id == bookId }
+                    if (index != -1) {
+                        books[index] = updatedBookData.copy(id = bookId)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    // Handle error
+                }
+        }
+    }
+
 
 }

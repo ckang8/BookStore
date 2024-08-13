@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.bookstoreproject.R
 import com.example.bookstoreproject.components.BookModal
 import com.example.bookstoreproject.components.Header
 import com.example.bookstoreproject.viewModel.BookViewModel
@@ -87,9 +86,7 @@ fun CreateBook (navController: NavController) {
         errorMessages = errors
         if (bookTitle.length > 50 || bookAuthor.length > 50 || bookDescription.length > 150) {
         } else if (errors.isEmpty()) {
-            val bookImageUri = bookImage ?: Uri.parse("android.resource://${context.packageName}/${R.drawable.ic_launcher_foreground}")
-//            saveBookToFirestore(bookTitle, bookAuthor, bookDescription, imageUri, navController)
-            bookViewModel.createBook(bookTitle, bookAuthor, bookDescription, bookImageUri)
+            bookViewModel.createBook(bookTitle, bookAuthor, bookDescription, bookImage)
             navController.navigate("home")
         }
         onCreateClick = false

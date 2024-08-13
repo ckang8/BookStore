@@ -161,7 +161,12 @@ fun ViewEditBook (
                     bookImage = bookImage?.toString(),
                     createdDate = currentDate
                 )
-                viewModel.updateBookWithID(it.id, updatedBook)
+                if (bookImage.toString() == it.bookImage) {
+                    viewModel.updateBookWithID(it.id, updatedBook, null)
+                } else {
+                    viewModel.updateBookWithID(it.id, updatedBook, bookImage)
+                }
+
                 mode = EditMode.VIEW
                 Toast.makeText(context, "Updated Successfully", Toast.LENGTH_SHORT).show()
             }

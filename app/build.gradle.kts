@@ -80,6 +80,7 @@ dependencies {
     //Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
+    implementation("com.google.firebase:firebase-storage")
 
     //Swipe
     implementation("me.saket.swipe:swipe:1.3.0")

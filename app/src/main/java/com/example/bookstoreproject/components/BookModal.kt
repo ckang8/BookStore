@@ -2,6 +2,8 @@ package com.example.bookstoreproject.components
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -112,19 +114,23 @@ fun BookModal (
     fun createImageUri(context: Context): Uri? {
         return try {
             val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            val storageDir: File = context.getExternalFilesDir(null) ?: context.filesDir
+            val storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
 
-            // Ensure the directory exists
+            // Ensure directory exists
             if (!storageDir.exists()) {
-                storageDir.mkdirs()
+                if (storageDir.mkdirs()) {
+                } else {
+                }
             }
 
+            // Create temporary file
             val imageFile = File.createTempFile(
                 "JPEG_${timeStamp}_",
                 ".jpg",
                 storageDir
             )
 
+            // Get URI from FileProvider
             val uri = FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.fileprovider",
@@ -132,9 +138,13 @@ fun BookModal (
             )
             uri
         } catch (e: Exception) {
+            // Detailed error logging
+            Log.e("CreateImageUri", "Error creating image URI", e)
             null
         }
     }
+
+
 
     val handleOptionSelected: (String) -> Unit = { option ->
         when (option) {
