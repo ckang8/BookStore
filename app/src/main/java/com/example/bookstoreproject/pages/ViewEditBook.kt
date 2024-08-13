@@ -60,6 +60,7 @@ fun ViewEditBook (
     val context = LocalContext.current
     var mode by remember { mutableStateOf(EditMode.VIEW) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    var errorMessages by remember { mutableStateOf(mapOf<String, String>()) }
 
     book?.let {
         LaunchedEffect(it) {
@@ -121,7 +122,8 @@ fun ViewEditBook (
                         containerColor = if (mode == EditMode.VIEW) Color.Transparent else null,
                         isView = mode == EditMode.VIEW,
                         isEdit = mode == EditMode.EDIT,
-//                        isReset = if (onResetClick) true else false
+                        errorMessages = errorMessages
+
                     )
                 }
             }
@@ -135,15 +137,22 @@ fun ViewEditBook (
             keyboardController?.hide()
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
             val currentDate = dateFormat.format(System.currentTimeMillis())
-            if (bookTitle.isBlank() || bookAuthor.isBlank() || bookDescription.isBlank()) {
-                onResetClick = false
-                Toast.makeText(context, "Field cannot be blank", Toast.LENGTH_SHORT).show()
-            } else if (bookTitle == it.bookTitle && bookAuthor == it.bookAuthor && bookDescription == it.bookDescription && bookImage.toString() == it.bookImage ) {
-                onResetClick = false
+            val errors = mutableMapOf<String, String>()
+            if (bookTitle.isBlank()) {
+                errors["bookTitle"] = "Title cannot be blank"
+            }
+            if (bookAuthor.isBlank()) {
+                errors["bookAuthor"] = "Author cannot be blank"
+            }
+            if (bookDescription.isBlank()) {
+                errors["bookDescription"] = "Description cannot be blank"
+            }
+            errorMessages = errors
+
+            if (bookTitle == it.bookTitle && bookAuthor == it.bookAuthor && bookDescription == it.bookDescription && bookImage.toString() == it.bookImage ) {
                 Toast.makeText(context, "No changes made", Toast.LENGTH_SHORT).show()
-            } else if (bookTitle.length > 30 || bookAuthor.length > 30 || bookDescription.length > 150) {
-                onResetClick = false
-            } else {
+            } else if (bookTitle.length > 50 || bookAuthor.length > 50 || bookDescription.length > 150) {
+            } else if (errors.isEmpty()) {
                 val updatedBook = Book(
                     id = it.id,
                     bookTitle = bookTitle,
@@ -155,8 +164,8 @@ fun ViewEditBook (
                 viewModel.updateBookWithID(it.id, updatedBook)
                 mode = EditMode.VIEW
                 Toast.makeText(context, "Updated Successfully", Toast.LENGTH_SHORT).show()
-                onResetClick = false
             }
+            onResetClick = false
         }
 
 

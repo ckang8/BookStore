@@ -2,7 +2,6 @@ package com.example.bookstoreproject.pages
 
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -32,6 +31,8 @@ fun CreateBook (navController: NavController) {
     var bookImage by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    var blankError by remember { mutableStateOf("") }
+    var errorMessages by remember { mutableStateOf(mapOf<String, String>()) }
 
     BackHandler(enabled = true) {}
 
@@ -59,7 +60,7 @@ fun CreateBook (navController: NavController) {
             onBookImageChange = { bookImage = it },
             isView = false,
             isEdit = false,
-//            isReset = false
+            errorMessages = errorMessages
         )
     }
 
@@ -67,17 +68,30 @@ fun CreateBook (navController: NavController) {
         navController.popBackStack()
     } else if(onCreateClick) {
         keyboardController?.hide()
-        if (bookTitle.isBlank() || bookAuthor.isBlank() || bookDescription.isBlank()) {
-            Toast.makeText(context, "All fields are required", Toast.LENGTH_SHORT).show()
-            onCreateClick = false
-        } else if (bookTitle.length > 30 || bookAuthor.length > 30 || bookDescription.length > 150) {
-            onCreateClick = false
-        }  else {
+        val errors = mutableMapOf<String, String>()
+
+        // Validation
+        if (bookTitle.isBlank()) {
+            errors["bookTitle"] = "Title cannot be blank"
+        }
+
+        if (bookAuthor.isBlank()) {
+            errors["bookAuthor"] = "Author cannot be blank"
+        }
+
+        if (bookDescription.isBlank()) {
+            errors["bookDescription"] = "Description cannot be blank"
+        }
+
+        // Update error messages state
+        errorMessages = errors
+        if (bookTitle.length > 50 || bookAuthor.length > 50 || bookDescription.length > 150) {
+        } else if (errors.isEmpty()) {
             val bookImageUri = bookImage ?: Uri.parse("android.resource://${context.packageName}/${R.drawable.ic_launcher_foreground}")
 //            saveBookToFirestore(bookTitle, bookAuthor, bookDescription, imageUri, navController)
             bookViewModel.createBook(bookTitle, bookAuthor, bookDescription, bookImageUri)
             navController.navigate("home")
-            onCreateClick = false
         }
+        onCreateClick = false
     }
 }

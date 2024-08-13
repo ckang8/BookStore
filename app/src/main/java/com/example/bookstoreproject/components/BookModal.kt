@@ -62,7 +62,7 @@ fun BookModal (
     containerColor: Color? = null,
     isView: Boolean,
     isEdit: Boolean,
-//    isReset: Boolean
+    errorMessages: Map<String, String>
 ) {
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -210,7 +210,7 @@ fun BookModal (
                         .padding(16.dp)
                         .border(
                             width = 2.dp,
-                            color = if (titleMessageError) Color.Red else Color.Gray,
+                            color = if (titleMessageError || errorMessages["bookTitle"] != null) Color.Red else Color.Gray,
                             shape = RoundedCornerShape(16.dp)
                         )
                         .background(containerColorSelect,RoundedCornerShape(16.dp))
@@ -224,25 +224,29 @@ fun BookModal (
                         TextField(
                             value = bookTitle,
                             onValueChange = { newTitle ->
-                                if ( newTitle.length > 30) {
+                                if (newTitle.length > 50) {
                                     titleMessageError = true
                                 } else {
                                     titleMessageError = false
                                 }
-                                onBookTitleChange(newTitle)
-                            },
+                                onBookTitleChange(newTitle) },
                             enabled = if (!isView || isEdit) true else false,
                             colors = CustomTextFieldColors(),
+                            maxLines = 3
                         )
                     }
-                    // Display error message if titleMessageError is true
                     if (titleMessageError) {
                         Spacer(modifier = Modifier.height(4.dp)) // Add space between TextField and error message
                         Text(
-                            text = "Title should not exceeded 30 characters",
+                            text = "Title should not exceeded 50 characters",
                             color = Color.Red,
                             style = TextStyle(fontSize = 12.sp)
                         )
+                    } else {
+                        errorMessages["bookTitle"]?.let { errorMessage ->
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = errorMessage, color = Color.Red, style = TextStyle(fontSize = 12.sp))
+                        }
                     }
                 }
 
@@ -251,7 +255,7 @@ fun BookModal (
                         .padding(16.dp)
                         .border(
                             width = 2.dp,
-                            color = if (authorMessageError) Color.Red else Color.Gray,
+                            color = if ( authorMessageError || errorMessages["bookAuthor"] != null) Color.Red else Color.Gray,
                             shape = RoundedCornerShape(16.dp)
                         )
                         .background(containerColorSelect,RoundedCornerShape(16.dp))
@@ -265,25 +269,29 @@ fun BookModal (
                         TextField(
                             value = bookAuthor,
                             onValueChange = { newAuthor ->
-                                if ( newAuthor.length > 30) {
+                                if (newAuthor.length > 50) {
                                     authorMessageError = true
                                 } else {
                                     authorMessageError = false
                                 }
-                                onBookAuthorChange(newAuthor)
-                            },
+                                onBookAuthorChange(newAuthor) },
                             enabled = if (!isView || isEdit) true else false,
                             colors = CustomTextFieldColors(),
+                            maxLines = 3
                         )
                     }
-                    // Display error message if titleMessageError is true
                     if (authorMessageError) {
                         Spacer(modifier = Modifier.height(4.dp)) // Add space between TextField and error message
                         Text(
-                            text = "Author should not exceeded 30 characters",
+                            text = "Author should not exceeded 50 characters",
                             color = Color.Red,
                             style = TextStyle(fontSize = 12.sp)
                         )
+                    } else {
+                        errorMessages["bookAuthor"]?.let { errorMessage ->
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = errorMessage, color = Color.Red, style = TextStyle(fontSize = 12.sp))
+                        }
                     }
                 }
 
@@ -294,7 +302,7 @@ fun BookModal (
                         .fillMaxWidth()
                         .border(
                             width = 2.dp, // Border width
-                            color = if (descriptionMessageError) Color.Red else Color.Gray,
+                            color = if (descriptionMessageError || errorMessages["bookDescription"] != null) Color.Red else Color.Gray,
                             shape = RoundedCornerShape(16.dp) // Apply the same radius to the border
                         )
                         .background(containerColorSelect,RoundedCornerShape(16.dp))
@@ -303,7 +311,7 @@ fun BookModal (
                     TextField(
                         value = bookDescription,
                         onValueChange = { newDescription ->
-                            if ( newDescription.length > 150) {
+                            if (newDescription.length > 150) {
                                 descriptionMessageError = true
                             } else {
                                 descriptionMessageError = false
@@ -323,6 +331,11 @@ fun BookModal (
                             color = Color.Red,
                             style = TextStyle(fontSize = 12.sp)
                         )
+                    } else {
+                        errorMessages["bookDescription"]?.let { errorMessage ->
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = errorMessage, color = Color.Red, style = TextStyle(fontSize = 12.sp))
+                        }
                     }
                 }
             }
